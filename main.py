@@ -37,9 +37,7 @@ class MyForm(QMainWindow):
         1m -> 3px
         """
         return 1/3
-
-    def funcion_prueba(self):
-    	print("hola xd")
+    	
     def simular(self):
         factor = self.getScaleFactor()
         Nusers = self.users.value()

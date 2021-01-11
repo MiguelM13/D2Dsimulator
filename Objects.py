@@ -1,6 +1,6 @@
 import pygame
 from pygame.math import Vector2
-from random import randint
+from random import randint, uniform
 from algoritmos import *
 
 
@@ -38,6 +38,7 @@ class Car(object):
 
 	def __init__(self, x=0.0, y=0.0, inner_radius=3, radius=16, inner_color=(2, 2, 2), color=(52, 235, 222, 50),
 				 Id="Car", mapSize=[1024, 768]):
+		self.dt = 1/30
 		self.position = Vector2(x, y)
 		self.lastPosition = self.position
 		self.inner_radius = inner_radius
@@ -57,9 +58,6 @@ class Car(object):
 		self.currentWall = 0
 		self.i = 0
 		self.collide = False
-		self.links = []
-		self.trafficSignal = []
-		self.traffic = 0
 		self.speed = 1
 
 		self.mapSize = mapSize
@@ -70,14 +68,31 @@ class Car(object):
 			print(e)
 		self.text_surface = self.font.render(self.Id, True, pygame.Color('dodgerblue1'))
 		self.text_rect = self.text_surface.get_rect()
-		self.list_connections = Register(Id=Id)
+		self.listConnections = Register(Id=Id)
 
-	def generate_traffic(self):
-		self.traffic = randint(0, self.max_traffic)
-		self.trafficSignal.append(self.traffic)
-		if len(self.trafficSignal) > 100:
-			# print('Trafico ', self.Id, ' :', self.trafficSignal)
-			self.trafficSignal = []
+		# For record
+		self.distanceFC = 0
+		self.isConnected = False
+		self.recording = False
+		self.recordLimit = 500
+		self.T = 15
+		self.variables = {}
+		self.variables["position"] = []
+		self.variables["traffic"] = []
+		self.variables["Prx"] = []
+		self.variables["time"] = []
+
+		self.links = []
+		self.time = []
+		self.trafficSignal = []
+		self.PrxSignal = []
+		self.traffic = 0 # Mbps
+		self.Prx = -100 # dBm
+		self.t = 0 # segs
+
+
+	def start_recording(self):
+		self.recording = False
 
 	def draw(self, surface):
 		"""Dibuja el punto (carro) sobre la superficie deseada
@@ -166,7 +181,6 @@ class Car(object):
 			self.i = 0
 
 	def positionLimits(self):
-
 		if self.position.x >= self.mapSize[0]:
 			self.position.x = 1
 			self.dir = 2
@@ -212,6 +226,7 @@ class Car(object):
 			self.collide = False
 			# Verificar si el auto está en los límites del mapa
 			self.positionLimits()
+			self.updateVariables()
 
 	def checkLinks(self, surface, Cars):
 		cars = Cars.getElements()
@@ -224,9 +239,52 @@ class Car(object):
 				self.updateCarsLinks(surface, cars[Id])
 
 	def updateCarsLinks(self, surface, car):
+		"""Verifica si existe enlace con otros autos"""
 		if self.circleCollide(car):
 			self.drawLink(surface, car, color=(200,100,50))
-		pass
+	
+
+	def update_traffic(self):
+		"""Actualiza el tráfico generado por cada auto"""
+		self.traffic = uniform(0, self.max_traffic)*self.dt
+		if len(self.trafficSignal) > self.recordLimit:
+			# print('Trafico ', self.Id, ' :', self.trafficSignal)
+			self.trafficSignal = []
+
+	def clearVariables(self):
+		self.t =0
+		self.variables["position"] = []
+		self.variables["traffic"] = []
+		self.variables["Prx"] = []
+		self.variables["time"] = []		
+
+	def printVariables(self):
+		print("--------------------------------------")
+		print(self.Id)
+		print("  **Tráfico: ", self.variables["traffic"][:5])
+		print("")
+		print(" **Prx: ", self.variables["Prx"][:5])
+		print("")
+		print(" **time: ", self.variables["time"][:5])
+		print("")
+
+	def updateVariables(self):
+		"""Actualiza el valor de las variables"""
+		self.traffic = uniform(0, self.max_traffic)*self.dt
+		self.Prx = uniform(-75, 0)
+		#self.variables["position"].append([self.position.x, self.position.y])
+		self.variables["traffic"].append(self.traffic)
+		self.variables["Prx"].append(self.Prx)
+		if self.Id == "C1":
+			print("{} Time:{:.2f} , {}".format(self.Id, self.t, len(self.variables["traffic"])))
+		if self.t >= self.T :
+			self.clearVariables()
+
+	def updateTime(self, dt):
+		self.t+=dt
+
+	def getResults(self):
+		return dict(self.variables)
 
 	def updateLink(self, surface, car):
 		"""Verificar si existe enlace con algún objeto circular
@@ -235,13 +293,14 @@ class Car(object):
 			car: Objeto circular, con el que se enlazará
 		"""
 		# si está dentro del área de cobertura (si hay colisión) enlazar
-		if self.circleCollide(car):
-			self.generate_traffic()
+		self.isConnected = self.circleCollide(car)
+		if self.isConnected:
 			self.drawLink(surface, car)
-			self.list_connections.add(car)
-			# self.list_connections.showElements()
+			self.listConnections.add(car)
+			# self.listConnections.showElements()
 		else:
-			self.list_connections.delete(car)
+			self.listConnections.delete(car)
+		#self.listConnections.showElements()
 
 	def drawLink(self, screen, car, color=(10,10, 50)):
 		"""Dibujar Enlace
@@ -291,24 +350,31 @@ class Femtocell(Car):
 
 
 class Register(object):
+	"""Objeto registro, empleado para almacenar los enlaces"""
 
-    def __init__(self, Id="R"):
-        super().__init__()
-        self.dic = {}
-        self.Id = Id
+	def __init__(self, Id="R"):
+	    super().__init__()
+	    self.dic = {}
+	    self.Id = Id
 
-    def add(self, element):
-        Id = element.Id
-        if not Id in self.dic:
-            self.dic[Id] = element
+	def add(self, element):
+		"""Añade un elemento al registro"""
+		Id = element.Id
+		if not Id in self.dic:
+		    self.dic[Id] = element
 
-    def delete(self, element):
-        Id = element.Id
-        if Id in self.dic:
-            self.dic.pop(Id)
+	def delete(self, element):
+		"""Elimina elemento del registro"""
+		Id = element.Id
+		if Id in self.dic:
+		    self.dic.pop(Id)
 
-    def showElements(self):
-        print(self.Id, ": ", list(self.dic.keys()))
+	def showElements(self):
+		"""Muestra los elementos"""
+		print(self.Id, ": ", list(self.dic.keys()))
+
+	def getData(self):
+		return None
 
 
 class Group(object):
@@ -316,8 +382,12 @@ class Group(object):
 
 	def __init__(self, prefix="default"):
 		self.elements = {}
+		self.results = {}
 		self.indx = 1
 		self.prefix = prefix
+		self.t = 0
+		self.T = 10
+		self.time = []
 
 	def getElements(self):
 		return self.elements
@@ -360,3 +430,39 @@ class Group(object):
 		if self.elements:
 			for Id in self.elements.keys():
 				self.elements[Id].carsLinks(surface, self.getElements())
+
+	def clearResults(self):
+		self.results = {}
+		for Id in self.elements.keys():
+			self.elements[Id].clearVariables()
+		self.time = []
+
+	def readResults(self):
+		for Id in self.elements.keys():
+			self.results[Id] = self.elements[Id].getResults()
+		self.results["time"] = self.time
+		np.save("results.npy", self.results)
+		#self.printResults()
+		print("Grabación Terminada!", len(self.time))
+
+	def printResults(self):
+		for Id in self.results:
+			print("--------------------------------------")
+			print(Id)
+			print("  **Tráfico: ", self.results[Id]["traffic"][:5])
+			print("")
+			print(" **Prx: ", self.results[Id]["Prx"][:5])
+			print("")
+			print(" **time: ", self.results[Id]["time"][:5])
+			print("")
+
+	def updateTime(self, dt):
+		self.time.append(self.t)
+		self.t+=dt 
+		for Id in self.elements.keys():
+			self.elements[Id].updateTime(dt)
+
+		if self.t >= self.T:
+			self.readResults()
+			self.clearResults()
+			self.t = 0

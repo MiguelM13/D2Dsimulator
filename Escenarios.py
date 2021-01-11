@@ -104,6 +104,7 @@ def escenario_3(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     simulador3 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
     th1 = Thread(target=simulador3.run, args=(playBtn,))
     th1.start()
+    
 def escenario_4(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720

@@ -35,8 +35,6 @@ class Simulator:
 
                 # Dibujar y actualizar grupos de objetos
                 self.walls.draw(self.surface)
-
-
                 self.fcs.draw(self.surface)
                 #self.fcs.draw(self.surface)
                 #self.cars.draw(self.screen)
@@ -45,7 +43,8 @@ class Simulator:
                 self.cars.move(self.walls)
                 self.cars.updateLinksWithOthersCars(self.surface)
                 self.fcs.updateLinks(self.surface, self.cars)
-
+                
+                self.cars.updateTime(dt)
                 self.clock.tick(self.ticks)
                 self.screen.blit(self.surface, (0, 0))
                 pygame.display.flip()
