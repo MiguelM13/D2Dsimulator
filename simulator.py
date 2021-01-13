@@ -1,5 +1,6 @@
 import pygame
 import time
+import numpy as np
 
 class Simulator:
     def __init__(self, width=1024, height=720, background=(255, 255, 255), walls=None, cars=None,
@@ -41,10 +42,22 @@ class Simulator:
                 self.cars.draw(self.surface)
                 self.walls.draw(self.screen)
                 self.cars.move(self.walls)
+                self.fcs.move(self.walls, stop=True)
                 self.cars.updateLinksWithOthersCars(self.surface)
                 self.fcs.updateLinks(self.surface, self.cars)
                 
                 self.cars.updateTime(dt)
+                self.fcs.updateTime(dt)
+                data_car = self.cars.getData()
+                data_fc = self.fcs.getData()
+
+                if data_car and data_fc:
+                    print("Saving...")
+                    data = {"FCS": data_fc, "CARS": data_car}
+                    np.save("results.npy", data)
+                    self.cars.clearResults()
+                    self.fcs.clearResults()
+
                 self.clock.tick(self.ticks)
                 self.screen.blit(self.surface, (0, 0))
                 pygame.display.flip()

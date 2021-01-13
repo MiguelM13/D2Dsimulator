@@ -38,10 +38,7 @@ class MyForm(QMainWindow):
         1m -> 3px
         """
         return 1/3
-<<<<<<< HEAD
-=======
-    	
->>>>>>> 4c761fa6f80464d6d6b6c1a6792c83985399c224
+
     def simular(self):
         factor = self.getScaleFactor()
         Nusers = self.users.value()

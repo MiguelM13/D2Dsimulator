@@ -74,12 +74,14 @@ class Car(object):
 		self.isConnected = False
 		self.recording = False
 		self.recordLimit = 500
-		self.T = 15
+		self.T = 25
 		self.variables = {}
 		self.variables["position"] = []
 		self.variables["traffic"] = []
 		self.variables["Prx"] = []
 		self.variables["time"] = []
+		self.variables["Bw"] = []
+		self.variables["Links"] = []
 
 		self.links = []
 		self.time = []
@@ -88,7 +90,6 @@ class Car(object):
 		self.traffic = 0 # Mbps
 		self.Prx = -100 # dBm
 		self.t = 0 # segs
-
 
 	def start_recording(self):
 		self.recording = False
@@ -123,7 +124,7 @@ class Car(object):
 		corner_distance_sq = corner_x ** 2.0 + corner_y ** 2.0
 		return corner_distance_sq <= r ** 2.0
 
-	def WallsCollides(self, Walls):
+	def WallsCollides(self, Walls, stop=False):
 		"""Dada una lista de paredes, verificar si el auto se chocó con alguna de ellas
 		Args:
 			Walls: Objeto Group (grupo/lista de objetos)
@@ -133,7 +134,7 @@ class Car(object):
 		self.wallNumbers = len(walls)
 		# Verificar colisión para cada pared en la lista de paredes
 		for Id in walls.keys():
-			self.move(walls[Id])
+			self.move(walls[Id], stop=stop)
 
 	def circleCollide(self, circle):
 		"""Determina si hay una colisión con un objecto circular
@@ -196,7 +197,7 @@ class Car(object):
 			self.position.y = self.mapSize[1] - 1
 			self.dir = 3
 
-	def move(self, wall):
+	def move(self, wall, stop=False):
 		"""Actualiza el estado del vehículo
 		Args:
 			wall: objeto pared
@@ -215,12 +216,14 @@ class Car(object):
 				self.dir = self.newDir
 				#self.move(wall)
 				# Generar giro aleatorio
-				self.randomTurn()
+				if not stop:
+					self.randomTurn()
 			# Si existe colisión corregir movimiento
 			else:
 				self.position = self.lastPosition
 				self.dir = self.lastDir
-				self.updatePosition()
+				if not stop:
+					self.updatePosition()
 			# Limpiar estado de colisión
 			self.collide = False
 			# Verificar si el auto está en los límites del mapa
@@ -251,11 +254,13 @@ class Car(object):
 			self.trafficSignal = []
 
 	def clearVariables(self):
-		self.t =0
+		self.t = 0
 		self.variables["position"] = []
 		self.variables["traffic"] = []
 		self.variables["Prx"] = []
 		self.variables["time"] = []		
+		self.variables["Bw"] = []
+		self.variables["Links"] = []
 
 	def printVariables(self):
 		print("--------------------------------------")
@@ -271,11 +276,15 @@ class Car(object):
 		"""Actualiza el valor de las variables"""
 		self.traffic = uniform(0, self.max_traffic)*self.dt
 		self.Prx = uniform(-75, 0)
+		Bw = 5 #
 		#self.variables["position"].append([self.position.x, self.position.y])
 		self.variables["traffic"].append(self.traffic)
 		self.variables["Prx"].append(self.Prx)
+		self.variables["Bw"].append(Bw)
+		self.variables["Links"].append(self.listConnections.getData())
 		if self.Id == "C1":
-			print("{} Time:{:.2f} , {}".format(self.Id, self.t, len(self.variables["traffic"])))
+			# print("{} Time:{:.2f} , {}".format(self.Id, self.t, len(self.variables["traffic"])))
+			pass
 		if self.t >= self.T :
 			self.clearVariables()
 
@@ -299,6 +308,7 @@ class Car(object):
 			# self.listConnections.showElements()
 		else:
 			self.listConnections.delete(car)
+
 		#self.listConnections.showElements()
 
 	def drawLink(self, screen, car, color=(10,10, 50)):
@@ -373,7 +383,7 @@ class Register(object):
 		print(self.Id, ": ", list(self.dic.keys()))
 
 	def getData(self):
-		return None
+		return list(self.dic.keys())
 
 
 class Group(object):
@@ -385,7 +395,7 @@ class Group(object):
 		self.indx = 1
 		self.prefix = prefix
 		self.t = 0
-		self.T = 10
+		self.T = 20
 		self.time = []
 
 	def getElements(self):
@@ -412,12 +422,12 @@ class Group(object):
 			for Id in self.elements.keys():
 				print(Id, ":", self.elements[Id])
 
-	def move(self, walls=None):
+	def move(self, walls=None, stop=False):
 		"""move objects"""
 		if self.elements:
 			for Id in self.elements.keys():
 				if walls is not None:
-					self.elements[Id].WallsCollides(walls)
+					self.elements[Id].WallsCollides(walls, stop=stop)
 
 	def updateLinks(self, surface, cars):
 		""""""
@@ -436,13 +446,15 @@ class Group(object):
 			self.elements[Id].clearVariables()
 		self.time = []
 
+
 	def readResults(self):
 		for Id in self.elements.keys():
 			self.results[Id] = self.elements[Id].getResults()
 		self.results["time"] = self.time
-		np.save("results.npy", self.results)
+		return dict(self.results)
+		#np.save("results.npy", self.results)
 		#self.printResults()
-		print("Grabación Terminada!", len(self.time))
+		#print("Grabación Terminada!", len(self.time))
 
 	def printResults(self):
 		for Id in self.results:
@@ -455,13 +467,21 @@ class Group(object):
 			print(" **time: ", self.results[Id]["time"][:5])
 			print("")
 
+	def getData(self):
+		if self.t >= self.T:
+			self.t = 0
+			print("Grabacin terminada")
+			return self.readResults()
+		else:
+			return None
+
 	def updateTime(self, dt):
 		self.time.append(self.t)
-		self.t+=dt 
+		self. t+= dt
 		for Id in self.elements.keys():
 			self.elements[Id].updateTime(dt)
 
-		if self.t >= self.T:
-			self.readResults()
-			self.clearResults()
-			self.t = 0
+		# if self.t >= self.T:
+		# 	self.readResults()
+		# 	#self.clearResults()
+			

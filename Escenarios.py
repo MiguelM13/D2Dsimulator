@@ -102,14 +102,9 @@ def escenario_3(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height])
     fcs = generate_fc(centers_corner, NFC, radioFC, color=(50, 100, 180, 180))
     simulador3 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
-<<<<<<< HEAD
     th3 = Thread(target=simulador3.run, args=(playBtn,))
     th3.start()
-=======
-    th1 = Thread(target=simulador3.run, args=(playBtn,))
-    th1.start()
-    
->>>>>>> 4c761fa6f80464d6d6b6c1a6792c83985399c224
+
 def escenario_4(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720
