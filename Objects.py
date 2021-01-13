@@ -8,7 +8,6 @@ class Wall(object):
     """Objeto pared
 	Args:
 	"""
-
     def __init__(self, x=0.0, y=0.0, width=10.0, height=10.0, color=(184, 146, 50, 128), Id="Wall"):
         self.position = Vector2(x, y)
         self.width = width

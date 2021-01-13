@@ -93,28 +93,28 @@ def calculate_interference_cotier(Pj=None, PLsc=1, No=-174):
     return I
 
 
-def calculate_SINR(Psc=None, PLsc=None, I=None, No=-174):
-    """Calcular el SNR de un cierto usuario i
-    Args:
-        SNRi: Relación señal-ruido para el usuario i
-        Psc: (list) Potencia asignada a la subportadora SCn del usuario i
-        PLsc: (list) Pérdida por trayectoria de la subportadora SC del usuario i
-        No: Potencia de Ruido dBm/Hz
-    Returns:
-        SNR: Relación señal a ruido
-    """
-    SINR = 0
-    if Psc and PLsc and I:
-        # Número de subportadoras
-        if len(Psc) == len(PLsc):
-            Tsc = len(Psc)
-            for n in range(Tsc):
-                SINR += Psc[n] / (PLsc[n] * (No + I))
-        else:
-            raise AssertionError('Psc and PLsc must have same dimension...')
-    else:
-        SINR = None
-    return SINR
+# def calculate_SINR(Psc=None, PLsc=None, I=None, No=-174):
+#     """Calcular el SNR de un cierto usuario i
+#     Args:
+#         SNRi: Relación señal-ruido para el usuario i
+#         Psc: (list) Potencia asignada a la subportadora SCn del usuario i
+#         PLsc: (list) Pérdida por trayectoria de la subportadora SC del usuario i
+#         No: Potencia de Ruido dBm/Hz
+#     Returns:
+#         SNR: Relación señal a ruido
+#     """
+#     SINR = 0
+#     if Psc and PLsc and I:
+#         # Número de subportadoras
+#         if len(Psc) == len(PLsc):
+#             Tsc = len(Psc)
+#             for n in range(Tsc):
+#                 SINR += Psc[n] / (PLsc[n] * (No + I))
+#         else:
+#             raise AssertionError('Psc and PLsc must have same dimension...')
+#     else:
+#         SINR = None
+#     return SINR
 
 
 def propagation_losses(d=5.0, units="m", alf=3, fc=2400, model="D2D"):

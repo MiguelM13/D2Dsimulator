@@ -13,6 +13,7 @@ class MyForm(QMainWindow):
         self.selector1.toggled.connect(self.set_choice1)
         self.selector2.toggled.connect(self.set_choice2)
         self.selector3.toggled.connect(self.set_choice3)
+        self.selector4.toggled.connect(self.set_choice4)
         self.simulBtn.clicked.connect(self.simular)
         # self.setWindowFlags( QtCore.Qt.CustomizeWindowHint)
 
@@ -37,9 +38,6 @@ class MyForm(QMainWindow):
         1m -> 3px
         """
         return 1/3
-
-    def funcion_prueba(self):
-    	print("hola xd")
     def simular(self):
         factor = self.getScaleFactor()
         Nusers = self.users.value()

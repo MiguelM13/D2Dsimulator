@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>649</width>
-    <height>764</height>
+    <height>798</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,7 +196,7 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
       <item row="0" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
-         <string>Usuarios (U)</string>
+         <string>Número de vehículos (U)</string>
         </property>
        </widget>
       </item>
@@ -222,7 +222,7 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
         <property name="minimum">
-         <number>1</number>
+         <number>10</number>
         </property>
         <property name="maximum">
          <number>30</number>
@@ -284,12 +284,18 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
+        <property name="minimum">
+         <number>5</number>
+        </property>
+        <property name="maximum">
+         <number>720</number>
+        </property>
        </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Tiempo</string>
+         <string>Tiempo (s)</string>
         </property>
        </widget>
       </item>
@@ -304,6 +310,12 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
        <widget class="QSpinBox" name="radioCar">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
         </property>
         <property name="value">
          <number>50</number>

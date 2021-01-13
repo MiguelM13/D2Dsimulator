@@ -44,7 +44,7 @@ def build_city(width=1280 , height=720, wallsColor=(10,200,50)):
 
 def generate_cars(init_positions, Ncars, color=(2, 2, 2), radius=16, mapSize=[1024, 720]):
     """Esta"""
-    cars = Group(prefix="car")  # Grupo de
+    cars = Group(prefix="car")  # Grupo de carros
     rand_centers = random.sample(init_positions, Ncars)
     i = 1
     print(radius)
@@ -75,7 +75,7 @@ def generate_fc(positions, NFC, radioFC, color=(80, 120, 50, 128)):
 def escenario_1(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720
-    pygame.display.set_caption("TODO EN COBERTURA")
+    pygame.display.set_caption("ESCENARIO TODO EN COBERTURA")
     walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(100, 100, 100, 128))
     cars = generate_cars(centers_street, Nusers, color=(40, 50, 180, 100), mapSize=[width, height], radius=radioCar)
     fcs = generate_fc(centers_corner, NFC, radioFC, color=(230, 50, 30, 120))
@@ -86,31 +86,31 @@ def escenario_1(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
 def escenario_2(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720
-    pygame.display.set_caption("Escenario Cobertura Parcial")
+    pygame.display.set_caption("ESCENARIO COBERTURA PARCIAL")
     walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(120, 80, 40))
     cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height], radius=radioCar)
     fcs = generate_fc(centers_corner, NFC, radioFC, color=(100, 50, 30, 180))
     simulador2 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
-    th1 = Thread(target=simulador2.run, args=(playBtn,))
-    th1.start()
+    th2 = Thread(target=simulador2.run, args=(playBtn,))
+    th2.start()
 
 def escenario_3(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720
-    pygame.display.set_caption("Escenario Fuera de Cobertura")
+    pygame.display.set_caption("ESCENARIO FUERA DE COBERTURA")
     walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(120, 80, 40))
     cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height])
     fcs = generate_fc(centers_corner, NFC, radioFC, color=(50, 100, 180, 180))
     simulador3 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
-    th1 = Thread(target=simulador3.run, args=(playBtn,))
-    th1.start()
+    th3 = Thread(target=simulador3.run, args=(playBtn,))
+    th3.start()
 def escenario_4(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     width = 1024
     height = 720
-    pygame.display.set_caption("Escenario sin D2D")
+    pygame.display.set_caption("ESCENARIO SIN D2D")
     walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(120, 13, 8))
     cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height])
     fcs = generate_fc(centers_corner, NFC, radioFC, color=(60, 100, 180, 180))
     simulador4 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
-    th1 = Thread(target=simulador4.run, args=(playBtn,))
-    th1.start()
+    th4 = Thread(target=simulador4.run, args=(playBtn,))
+    th4.start()
