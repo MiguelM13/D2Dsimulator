@@ -44,7 +44,8 @@ class MyForm(QMainWindow):
         Nusers = self.users.value()
         NFC = self.femtocells.value()
         radioFC = factor*self.radioFC.value()
-        Nsub = self.subCarriers.value()
+        Nsub = 256
+        # Nsub = self.subCarriers.value()
         radioCar = factor*self.radioCar.value()
 
         if self.choice == 1:
@@ -58,6 +59,7 @@ class MyForm(QMainWindow):
 
         if self.choice == 4:
             escenario_4(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+
 
 
 

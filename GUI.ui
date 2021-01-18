@@ -193,6 +193,29 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Radio Cobertura Auto (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="radioCar">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
@@ -216,6 +239,13 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Radio de Femtoceldas (m)</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QSpinBox" name="femtocells">
         <property name="alignment">
@@ -229,13 +259,6 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
         </property>
         <property name="value">
          <number>16</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Radio de Femtoceldas (m)</string>
         </property>
        </widget>
       </item>
@@ -262,24 +285,7 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string># Subportadoras (U)</string>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="1">
-       <widget class="QSpinBox" name="subCarriers">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="minimum">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
        <widget class="QSpinBox" name="spinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -292,33 +298,10 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Tiempo (s)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Radio Cobertura Auto (m)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="radioCar">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="value">
-         <number>50</number>
         </property>
        </widget>
       </item>

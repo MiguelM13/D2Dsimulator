@@ -64,7 +64,7 @@ def calculate_SNR(Psc=None, PLsc=None, No=-174):
             for n in range(Tsc):
                 SNR += Psc[n] / (PLsc[n] * No)
         else:
-            raise AssertionError('Psc and PLsc must have same dimension...')
+            raise Exception('Psc and PLsc must have same dimension...')
     else:
         SNR = None
     return SNR
@@ -87,34 +87,34 @@ def calculate_interference_cotier(Pj=None, PLsc=1, No=-174):
             for n in range(Tsc):
                 I += Pj[n] / (PLsc * No)
         else:
-            raise AssertionError('Psc and PLsc must have same dimension...')
+            raise Exception('Psc and PLsc must have same dimension...')
     else:
         I = None
     return I
 
 
-# def calculate_SINR(Psc=None, PLsc=None, I=None, No=-174):
-#     """Calcular el SNR de un cierto usuario i
-#     Args:
-#         SNRi: Relación señal-ruido para el usuario i
-#         Psc: (list) Potencia asignada a la subportadora SCn del usuario i
-#         PLsc: (list) Pérdida por trayectoria de la subportadora SC del usuario i
-#         No: Potencia de Ruido dBm/Hz
-#     Returns:
-#         SNR: Relación señal a ruido
-#     """
-#     SINR = 0
-#     if Psc and PLsc and I:
-#         # Número de subportadoras
-#         if len(Psc) == len(PLsc):
-#             Tsc = len(Psc)
-#             for n in range(Tsc):
-#                 SINR += Psc[n] / (PLsc[n] * (No + I))
-#         else:
-#             raise AssertionError('Psc and PLsc must have same dimension...')
-#     else:
-#         SINR = None
-#     return SINR
+def calculate_SINR(Psc=None, PLsc=None, I=None, No=-174):
+    """Calcular el SNR de un cierto usuario i
+    Args:
+        SINR: Relación señal-ruido para el usuario i
+        Psc: (list) Potencia asignada a la subportadora SCn del usuario i
+        PLsc: (list) Pérdida por trayectoria de la subportadora SC del usuario i
+        No: Potencia de Ruido dBm/Hz
+    Returns:
+        SNR: Relación señal a ruido
+    """
+    SINR = 0
+    if Psc and PLsc and I:
+        # Número de subportadoras
+        if len(Psc) == len(PLsc):
+            Tsc = len(Psc)
+            for n in range(Tsc):
+                SINR += Psc[n] / (PLsc[n] * (No + I))
+        else:
+            raise AssertionError('Psc and PLsc must have same dimension...')
+    else:
+        SINR = None
+    return SINR
 
 
 def propagation_losses(d=5.0, units="m", alf=3, fc=2400, model="D2D"):
@@ -147,7 +147,7 @@ def propagation_losses(d=5.0, units="m", alf=3, fc=2400, model="D2D"):
     return PL
 
 
-def subcarrier_power(d=5.0, units="m", alf=3, RSRP=-75, dB=True):
+def subcarrier_power(d=5.0, units="m", alf=3, RSRP=-75, dB=True, model="FC"):
     """Estima la potencia de la subportadora
     Args:
         d: distancia
@@ -157,14 +157,14 @@ def subcarrier_power(d=5.0, units="m", alf=3, RSRP=-75, dB=True):
     Returns:
         Psc: Potencia de subportadora mW/dBm
     """
-    PL = propagation_losses(d=d, units=units, alf=alf)
+    PL = propagation_losses(d=d, units=units, alf=alf, model=model)
     Psc = RSRP + PL
     if not dB:
         Psc = 10 ** (Psc / 10)
     return Psc
 
 # PL = propagation_losses(d=5.0, units="m", alf=3, fc=2400, model="D2D")
-# Pw = subcarrier_power(d=5.0)
+#Pw = subcarrier_power(d=5.0)
 # Y = channel_capacity_OFDMA(SINR=10, BWvec=[1 , 2])
 # I = calculate_interference_cotier(Pj= [1,3,4], PLsc=1, No=-174)
 # SNR = calculate_SNR(Psc=[1, 2], PLsc=[3, 4], No=-174)
