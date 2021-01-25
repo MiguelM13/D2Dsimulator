@@ -12,8 +12,8 @@ for Id in data:
 	if Id != "time":
 		links = data[Id]["Links"]
 		#print(Id, data[Id].keys())
-links = data["F1"]["Links"]
-traffic = data["F1"]["traffic"]
+links = data["F5"]["Links"]
+traffic = data["F5"]["traffic"]
 t = data["time"]
 print(len(t), len(links))
 mlink = []

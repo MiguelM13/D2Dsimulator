@@ -160,11 +160,29 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
      </layout>
     </item>
     <item>
-     <widget class="QRadioButton" name="selector4">
-      <property name="text">
-       <string>ESCENARIO SIN D2D</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="selector4">
+        <property name="text">
+         <string>ESCENARIO SIN D2D</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="selector5">
+        <property name="text">
+         <string>CLUSTERS INCLUIDOS</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="selector6">
+        <property name="text">
+         <string>SIN CLUSTERS</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QLabel" name="labelData">
@@ -175,7 +193,7 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
        </sizepolicy>
       </property>
       <property name="text">
-       <string>DATOS DE ENTRADA</string>
+       <string>CONFIGURACIÓN DE LA RED</string>
       </property>
       <property name="scaledContents">
        <bool>false</bool>
@@ -268,13 +286,13 @@ font: 20pt &quot;Franklin Gothic Medium&quot;;
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
         <property name="minimum">
-         <number>50</number>
+         <number>100</number>
         </property>
         <property name="maximum">
          <number>500</number>
         </property>
         <property name="value">
-         <number>200</number>
+         <number>100</number>
         </property>
        </widget>
       </item>

@@ -50,7 +50,7 @@ def generate_cars(init_positions, Ncars, color=(2, 2, 2), radius=16, mapSize=[10
     rand_centers = random.sample(init_positions, Ncars)
     i = 1
     for item in rand_centers:
-        cars.add(Car(*item, Id="Car"+str(i), color=color, radius=radius, mapSize=mapSize, d2d=d2d))
+        cars.add(Car(*item, Id="C"+str(i), color=color, radius=radius, mapSize=mapSize, d2d=d2d))
         i += 1
     return cars
 
@@ -64,7 +64,7 @@ def generate_fc(positions, NFC, radioFC, color=(80, 120, 50, 128)):
             if i%space_between_fc == 0 and j%space_between_fc == 0:
                 if indx < NFC:
                     position = positions[i][j]
-                    fcs.add(Femtocell(*position, radius=radioFC, color=color, Id="Femto" + str(indx + 1)))
+                    fcs.add(Femtocell(*position, radius=radioFC, color=color, Id="FC" + str(indx + 1)))
                     indx += 1
     return fcs
 
@@ -114,7 +114,29 @@ def escenario_4(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
     radioFC =2000*0.3
     walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(181, 187, 196))
     cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height], d2d=False)
-    fcs = generate_fc(centers_corner, NFC, radioFC, color=(189, 143, 177, 180))
+    fcs = generate_fc(centers_corner, NFC, radioFC, color=(189, 153, 177, 180))
     simulador4 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
     th4 = Thread(target=simulador4.run, args=(playBtn,))
     th4.start()
+
+def escenario_5(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
+    width = 1024
+    height = 720
+    pygame.display.set_caption("ESCENARIO D2D CON CLUSTERS INCLUIDOS")
+    walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(181, 187, 196))
+    cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height], d2d=False)
+    fcs = generate_fc(centers_corner, NFC, radioFC, color=(189, 163, 177, 180))
+    simulador5 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
+    th5 = Thread(target=simulador5.run, args=(playBtn,))
+    th5.start()
+
+def escenario_6(Nusers, NFC, radioFC, Nsub, playBtn, radioCar):
+    width = 1024
+    height = 720
+    pygame.display.set_caption("ESCENARIO D2D SIN CLUSTERS")
+    walls, centers_corner, centers_street = build_city(width=width, height=height, wallsColor=(181, 187, 196))
+    cars = generate_cars(centers_street, Nusers, color=(100, 100, 10), mapSize=[width, height], d2d=False)
+    fcs = generate_fc(centers_corner, NFC, radioFC, color=(189, 143, 177, 180))
+    simulador6 = Simulator(width=width, height=height, walls=walls, cars=cars, fcs=fcs)
+    th6 = Thread(target=simulador6.run, args=(playBtn,))
+    th6.start()
