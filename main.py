@@ -3,6 +3,7 @@ from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from Escenarios import escenario_1, escenario_2, escenario_3, escenario_4,escenario_5,escenario_6
 
+
 class MyForm(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -14,8 +15,8 @@ class MyForm(QMainWindow):
         self.selector2.toggled.connect(self.set_choice2)
         self.selector3.toggled.connect(self.set_choice3)
         self.selector4.toggled.connect(self.set_choice4)
-        self.selector5.toggled.connect(self.set_choice5)
-        self.selector6.toggled.connect(self.set_choice6)
+        # self.selector5.toggled.connect(self.set_choice5)
+        # self.selector6.toggled.connect(self.set_choice6)
         self.simulBtn.clicked.connect(self.simular)
         # self.setWindowFlags( QtCore.Qt.CustomizeWindowHint)
 
@@ -54,27 +55,27 @@ class MyForm(QMainWindow):
         Nusers = self.users.value()
         NFC = self.femtocells.value()
         radioFC = factor*self.radioFC.value()
-        Nsub = 256
-        # Nsub = self.subCarriers.value()
         radioCar = factor*self.radioCar.value()
+        clusters = self.clusters.isChecked()
+        d2d = self.d2d.isChecked()
 
         if self.choice == 1:
-            escenario_1(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_1(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
         if self.choice == 2:
-            escenario_2(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_2(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
         if self.choice == 3:
-            escenario_3(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_3(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
         if self.choice == 4:
-            escenario_4(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_4(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
         if self.choice == 5:
-            escenario_5(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_5(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
         if self.choice == 6:
-            escenario_6(Nusers, NFC, radioFC, Nsub, self.playBtn, radioCar)
+            escenario_6(Nusers=Nusers, NFC=NFC, radioFC=radioFC, radioCar=radioCar, playBtn=self.playBtn, d2d=d2d, clusters=clusters)
 
 
 if __name__ == '__main__':

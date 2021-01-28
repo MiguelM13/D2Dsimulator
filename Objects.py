@@ -57,7 +57,8 @@ class Car(object):
     max_traffic = 1  # Mbps
 
     def __init__(self, x=0.0, y=0.0, inner_radius=3, radius=16, inner_color=(2, 2, 2), color=(52, 235, 222, 50),
-                 Id="Car", mapSize=[1024, 768], d2d=True):
+                 Id="Car", indx=None, mapSize=[1024, 768], d2d=True):
+        self.indx = indx
         self.dt = 1 / 30
         self.position = Vector2(x, y)
         self.lastPosition = self.position
@@ -90,6 +91,7 @@ class Car(object):
         self.text_rect = self.text_surface.get_rect()
         self.listConnections = Register(Id=Id)
         self.femtoID = ""
+        self.femtoIndx = None
         self.d2d = d2d
         # For record
         self.distanceFC = 0
@@ -106,6 +108,7 @@ class Car(object):
         self.variables["time"] = []
         self.variables["Bw"] = []
         self.variables["Links"] = []
+        self.variables["SNRI"] = []
 
         self.links = []
         self.time = []
@@ -114,9 +117,10 @@ class Car(object):
         self.demand = 0  # Mbps
         self.Prx = -100  # dBm
         self.t = 0  # segs
+        self.SNRI = 0
 
-        self.Ptx = subcarrier_power(d=5.0)
-        self.updateDemand(random=True)
+        self.Ptx = subcarrier_power(d=5.0, dB=True)
+        self.updateDemand(random=False)
         self.bw_assigned = 0
         self.ym = 2  # Eficiencia espectral MC
         self.yf = 6  # Eficiencia esoectral FC
@@ -128,20 +132,40 @@ class Car(object):
 
         self.Nsc = 256  # Número de Subportadoras
         self.bwsc = 15 / 1000  # MHz Ancho de Banda por subportadora
-
+        self.bits_mod = 6
         self.subscribed = False
-        self.bits_mod = 1
+        self.subColorText = (200, 150, 50)
+        self.subColor = (20, 160, 140, 50)
+        self.subsCount = 1
 
-    def setSubscription(self, ID=None):
+        self.fcs = {}
+        self.users = {}
+
+    def setUsers(self, users):
+        users.pop(self.Id)
+        self.users = users
+
+    def setFemtocelss(self, fcs):
+        self.fcs = fcs
+
+    def setSubscription(self, femtoID=None, femtoIndx=None):
         """Subscribe el usuario a la Femtocelda indicada en ID"""
-        if ID is not None:
-            self.femtoID = ID
+        if femtoID is not None:
+            self.femtoID = femtoID
             self.subscribed = True
+            self.femtoIndx = femtoIndx
+            if self.femtoIndx:
+                self.Id = self.femtoID + " / S" + str(self.femtoIndx)
+                self.text_surface = self. font.render(self.Id, True, self.subColorText)
+                self.color = self.subColor
 
     def clearSubscription(self):
         """Elimina la subscripción"""
         self.femtoID = ""
         self.subscribed = False
+        self.femtoIndx = None
+
+        self.Id = "C " + self.indx
 
     def isSubscribed(self):
         """¿Está subscrito?"""
@@ -338,6 +362,10 @@ class Car(object):
         for Id in cars.keys():
             self.updateLink(surface, cars[Id])
 
+    def isConnectedWith(self, user):
+        """Verificar si existe conexión con"""
+        return user in self.links
+
     def carsLinks(self, surface, cars):
         for Id in cars.keys():
             if Id != self.Id:
@@ -357,6 +385,7 @@ class Car(object):
         self.variables["time"] = []
         self.variables["Bw"] = []
         self.variables["Links"] = []
+        self.variables["SNRI"] = []
 
     def printVariables(self):
         print("--------------------------------------")
@@ -380,16 +409,36 @@ class Car(object):
         else:
             self.demand = self.max_traffic
 
+    def updateSNRI(self):
+        PLvec = []
+        Pscvec = []
+        for car in self.users.values():
+            vec_dist = self.position - car.position
+            distance = vec_dist.magnitude()
+            PL = propagation_losses(d=distance)
+            PLvec.append(PL)
+            Pscvec.append(car.Ptx)
+
+        l1 = len(PLvec)
+        l2 = len(Pscvec)
+        if l1 > 0 and l2 > 0:
+            I = calculate_interference_cotier(Pj=Pscvec, PLsc=PLvec)
+            self.SNRI = calculate_SINR(Psc=Pscvec, PLsc=PLvec, I=I)
+            # if self.Id == "C20":
+            #     # print("SNRI: {:.10f}, I: {:.10f}".format(self.SNRI, I))
+
     def updateVariables(self):
         """Actualiza el valor de las variables"""
-        self.updateDemand()
+        self.updateDemand(random=False)
         self.updatePrx()
+        self.updateSNRI()
         Bw = 5  #
         # self.variables["position"].append([self.position.x, self.position.y])
         self.variables["traffic"].append(self.demand)
         self.variables["Prx"].append(self.Prx)
         self.variables["Bw"].append(Bw)
         self.variables["Links"].append(self.listConnections.getData())
+        self.variables["SNRI"].append(self.SNRI)
         if self.Id == "C1":
             # print("{} Time:{:.2f} , {}".format(self.Id, self.t, len(self.variables["traffic"])))
             pass
@@ -433,18 +482,26 @@ class Car(object):
         self.position.x = randint(0, 800)
         self.position.y = randint(10, 600)
 
+    def addSub(self):
+        self.subsCount += 1
+
+    def deleteSub(self):
+        self.subsCount -= 1
+        if subsCount < 0:
+            self.subsCount = 0
 
 class Femtocell(Car):
     """Objeto Femtocelda Hereda del objeto carro métodos y atributos"""
 
     def __init__(self, x=0.0, y=0.0, radius=40, inner_radius=5, color=(100, 100, 58, 128),
-                 inner_color=(10, 100, 58, 180), Id="Femtocell"):
-        super().__init__(x=x, y=y, color=color, radius=radius, inner_radius=inner_radius, Id=Id)
+                 inner_color=(10, 100, 58, 180), Id="Femtocell", indx=None):
+        super().__init__(x=x, y=y, color=color, radius=radius, inner_radius=inner_radius, Id=Id, indx=indx)
         self.radius = radius
         self.inner_radius = inner_radius
         self.color = color
         self.inner_color = inner_color
         self.Id = Id
+        self.indx = indx
         pygame.font.init()
         try:
             self.font = pygame.font.Font(None, 30)
@@ -507,6 +564,11 @@ class Group(object):
         self.time = []
         self.demandDict = {}
 
+    def setUsers(self):
+        for ID in self.elements:
+            neighbors = dict(self.elements)
+            self.elements[ID].setUsers(neighbors)
+
     def __getitem__(self, key):
         return self.elements[key]
 
@@ -523,6 +585,10 @@ class Group(object):
     def getPositionsDict(self):
         """Devuelve un diccinario con las posiciones de cada elemento"""
         return {ID: self.elements[ID].getPosition() for ID in self.elements}
+
+    def getPositionsList(self):
+        """Devuelve una lista con las posiciones"""
+        return [self.elements[ID].getPosition() for ID in self.elements]
 
     def add(self, item):
         """Añade un nuevo elemento a la lista"""
@@ -638,3 +704,32 @@ class Group(object):
 
     def getNumberSCAverage(self):
         return 1
+
+    def keys(self):
+        """Devuelve las llaves del diccionario"""
+        return self.elements.keys()
+
+    def getSubsPositionsList(self):
+        """Retorna las posiciones de los subscriptores"""
+        return [self.elements[ID].getPosition() for ID in self.elements if self.elements[ID].isSubscribed()]
+
+    def setSubscribers(self, n_subscribers=16, fcs=None, subs_per_fc=1):
+        """Asignar como subscriptor"""
+        cars = self.elements
+        if fcs is not None:
+            cars_ids = list(cars.keys())
+            fcs_ids = list(fcs.keys())
+            n_fcs = len(fcs_ids)
+            iters = n_subscribers*subs_per_fc
+            j = 0
+            aux = 0
+            if n_subscribers <= iters:
+                for i in range(iters):
+                    cars[cars_ids[i]].setSubscription(femtoID=fcs_ids[j], femtoIndx=fcs[fcs_ids[j]].subsCount)
+                    fcs[fcs_ids[j]].addSub()
+                    aux += 1
+                    if aux >= subs_per_fc:
+                        j += 1
+                        aux = 0
+            else:
+                raise Exception('Error while setting subscribers')
