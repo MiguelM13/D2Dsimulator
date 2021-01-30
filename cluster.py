@@ -1,4 +1,4 @@
-import Escenarios
+#from escenarios import generate_fc, generate_cars, build_city
 import pygame
 from pygame.math import Vector2
 from sklearn.cluster import KMeans
@@ -33,10 +33,10 @@ class ClusterGroup:
 
     def circleCollide(self, circle):
         """Determina si hay una colisión con un objecto circular
-		Args:
-			circle: objeto circular
+        Args:
+            circle: objeto circular
 
-		"""
+        """
         r1 = self.radius  # radio del objecto actual
         r2 = circle.inner_radius  # radio del objecto a comparar
         pos1 = self.centroid
@@ -52,6 +52,7 @@ class ClusterGroup:
         pygame.draw.circle(surface, self.inner_color, self.centroid, self.inner_radius, 0)
         pygame.draw.circle(surface, self.color, self.centroid, self.radius, 0)
         surface.blit(self.text_surface, self.centroid)
+
 
 class Cluster:
     def __init__(self, femtocells=None, users=None, prefix="cluster ", enable=True):
