@@ -7,12 +7,11 @@ n_experiments = 10  # número de experimentos
 n_clusters = 5  # número de clusters
 clusters = True  # clusters bandera
 d2d = True  # D2D bandera
-n_cars = 80  # número de autos
+n_cars = 50  # número de autos
 n_fc = 16  # número de femtoceldas
 
-radio_car = 10  # radio de los autos
+radio_car = 40  # radio de los autos
 radio_fc = 80  # radio de las femtoceldas
-
 
 # Generar mapa
 width = 1024
@@ -21,6 +20,7 @@ edifices, fcs_positions, cars_positions = build_city(width=width, height=height,
 cars = generate_cars(init_positions=cars_positions, n_cars=n_cars, color=(20, 160, 140, 100),
                      map_size=[width, height], radius_car=radio_car, d2d=d2d)
 fcs = generate_fc(init_positions=fcs_positions, n_fc=n_fc, radius_fc=radio_fc, color=(243, 34, 90, 150))
+
 # Simular
 simulator = Simulator(width=width, height=height, edifices=edifices, cars=cars, fcs=fcs, clusters=clusters)
 simulator.run()

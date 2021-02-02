@@ -4,32 +4,44 @@ from pygame.math import Vector2
 from sklearn.cluster import KMeans
 
 
-class ClusterGroup:
+class Coalition:
     def __init__(self, Id=None, centroid=None):
         self.Id = Id
         if centroid is not None:
             self.centroid = Vector2(centroid)
-        self.users_list = []
+        self.users = {}
         self.radius = 150
         pygame.font.init()
         try:
             self.font = pygame.font.Font(None, 30)
         except Exception as e:
             print(e)
-        self.text_surface = self.font.render(self.Id, True, (50,50,50,50))
-
+        self.text_surface = self.font.render(self.Id, True, (50, 50, 50, 50))
         self.color = [20, 90, 120, 95]
         self.inner_color = [20, 90, 120, 50]
         self.radius = 100
         self.inner_radius = 5
 
+    def __len__(self):
+        return len(self.users)
+
+    def __sub__(self, user):
+        new_users_dict = dict(self.users)
+        new_users_dict.pop(user.Id)
+        return new_users_dict
+
+    def __iter__(self):
+        return iter(self.users.values())
 
     def addUsers(self, users=None):
         if users is not None:
-            for ID in users.elements:
-                if self.circleCollide(users[ID]):
-                    self.users_list.append(users[ID].Id)
+            for user in users.elements.values():
+                if self.circleCollide(user):
+                    self.users[user.Id] = user
 
+    def getUsers(self):
+        """Devuelve los usuarios"""
+        return self.users
 
     def circleCollide(self, circle):
         """Determina si hay una colisión con un objecto circular
@@ -64,9 +76,7 @@ class Cluster:
         # Kmeans
         self.centroids = None
         self.indx = 0
-
         self.enable = enable
-
 
     def isEnabled(self):
         return self.enable
@@ -79,21 +89,20 @@ class Cluster:
             self.indx = 0
             return True
 
-    def kmeans(self, n_cluster=5):
+    def group(self, n_clusters=5):
         if self.femtocells is not None and self.users is not None:
-            if self.isProcessing() and self.isEnabled():
+            if self.isEnabled():
                 users_positions = self.users.getSubsPositionsList()
-                kmeans = KMeans(n_clusters=n_cluster).fit(users_positions)
+                kmeans = KMeans(n_clusters=n_clusters).fit(users_positions)
                 self.centroids = kmeans.cluster_centers_.T
-                for i in range(n_cluster):
+                for i in range(n_clusters):
                     x = self.centroids[0][i]
                     y = self.centroids[1][i]
                     centroid = (x, y)
                     ids = "Cluster " + str(i+1)
-                    self.groups[ids] = ClusterGroup(Id=ids, centroid=centroid)
+                    self.groups[ids] = Coalition(Id=ids, centroid=centroid)
                     self.groups[ids].addUsers(users=self.users)
                 self.printGroups()
-
 
     def draw(self, surface):
         if self.centroids is not None and self.isEnabled():
@@ -101,10 +110,13 @@ class Cluster:
                 self.groups[ID].draw(surface)
 
     def printGroups(self):
-        for ID in self.groups:
-            print(ID)
-            for element in self.groups[ID].users_list:
-                print(" -", element)
+        for group in self.groups.values():
+            print(group.Id)
+            for user in group.users.values():
+                print(" -", user.Id)
+
+    def getCoalitions(self):
+        return self.groups
 
 # width = 1024
 # height = 720

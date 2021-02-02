@@ -177,7 +177,6 @@ class Group(object):
     def move(self, edifices=None):
         """ Mover
         Args:
-            surface: pantalla para dibujar
             edifices: lista de edificios
         """
         if self.elements is not None:

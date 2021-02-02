@@ -3,6 +3,39 @@ import pygame
 from pygame.math import Vector2
 
 
+class Subcarrier(object):
+    def __init__(self, Id="subcarrier"):
+        self.Id = Id
+        self.used = False
+        self.user1 = None
+        self.user2 = None
+        self.bw = 0.015
+
+    def isUsed(self):
+        return self.used
+
+    def setLink(self, user1=None, user2=None):
+        if (user1 is not None) and (user2 is not None):
+            self.user1 = user1
+            self.user2 = user2
+
+    def getUsersLink(self):
+        return self.user1, self.user2
+
+
+class Subcarries(object):
+    def __init__(self, n_subcarriers=256, prefix="subcarrier "):
+        self.n_subcarriers = n_subcarriers
+        self.subcarriers = {prefix+str(i+1): Subcarrier(Id=prefix+str(i+1)) for i in range(n_subcarriers)}
+
+    def getUsedCarriers(self):
+        usedSubcarriers = []
+        for subcarrier in self.subcarriers.values():
+            if subcarrier.isUsed():
+                usedSubcarriers.append(subcarrier)
+        return usedSubcarriers
+
+
 class Edifice(object):
     """Objeto Edificio
     Args:

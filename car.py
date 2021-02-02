@@ -80,6 +80,7 @@ class Car(object):
         self.Ptx = subcarrier_power(d=5.0, dB=True)
         self.updateDemand(random=False)
         self.bw_assigned = 0
+        self.rf_su = 1  # suma del datarate de los subscriptores
         self.ym = 2  # Eficiencia espectral MC
         self.yf = 6  # Eficiencia esoectral FC
         self.No = -174  # dBm/Hz
@@ -87,7 +88,8 @@ class Car(object):
 
         self.pm = 60  # dBm Potencia MC
         self.pf = 10  # dBm Potencia FC
-
+        self.alpha_f = 0  # Pertenece a femtocelda
+        self.alpha_mc = 0  # Pertencece a macrocelda
         self.Nsc = 256  # Número de Subportadoras
         self.bwsc = 15 / 1000  # MHz Ancho de Banda por subportadora
         self.bits_mod = 6
@@ -170,6 +172,10 @@ class Car(object):
     def isSubscribed(self):
         """¿Está subscrito?"""
         return self.subscribed
+
+    def isPublic(self):
+        """¿Es usuario público?"""
+        return not self.subscribed
 
     def getFemtoID(self):
         """Devuelve el ID de la femtocelda subscrita"""
