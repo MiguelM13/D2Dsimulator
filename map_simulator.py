@@ -8,14 +8,15 @@ n_clusters = 5  # número de clusters
 clusters = True  # clusters bandera
 d2d = True  # D2D bandera
 n_cars = 50  # número de autos
-n_fc = 16  # número de femtoceldas
+n_fc = 15  # número de femtoceldas
 
-radio_car = 40  # radio de los autos
-radio_fc = 80  # radio de las femtoceldas
+factor = 1
+radio_car = 30*factor  # radio de los autos
+radio_fc = 100*factor  # radio de las femtoceldas
 
 # Generar mapa
 width = 1024
-height = 720
+height = 620
 edifices, fcs_positions, cars_positions = build_city(width=width, height=height, edificesColor=(100, 100, 100, 128))
 cars = generate_cars(init_positions=cars_positions, n_cars=n_cars, color=(20, 160, 140, 100),
                      map_size=[width, height], radius_car=radio_car, d2d=d2d)

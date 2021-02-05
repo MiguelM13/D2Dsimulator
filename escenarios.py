@@ -16,11 +16,11 @@ def build_city(width=1280, height=720, edificesColor=(10, 200, 50)):
     """
     # Para construir la Ciudad
     D = 8  # Separación entre calles (px)
-    w = 68  # Ancho de los edificiós (px)
-    h = 45  # Largo (altura rectangular) de los edificios (px)
+    w = 51  # Ancho de los edificiós (px)
+    h = 51  # Largo (altura rectangular) de los edificios (px)
 
-    W = width  # Ancho del mapa (px)
-    H = height  # Largo del mapa (px)
+    W = 1024  # Ancho del mapa (px)
+    H = 720  # Largo del mapa (px)
 
     # Calcular número de edificios
     m = int(W / w)  # ¿Cuántos edificios caben a lo ancho del mapa?
@@ -29,13 +29,14 @@ def build_city(width=1280, height=720, edificesColor=(10, 200, 50)):
 
     centers_corner = []  # Esquina
     centers_street = []  # Centro calle
-    offset = 5
+    offset_x = 5
+    offset_y = 5
     rows = []
     # Contruir ciudad
     for i in range(m):
         for j in range(n):
-            x = int(i * w + offset)
-            y = int(j * h)
+            x = int(i * w + offset_x)
+            y = int(j * h + offset_y)
             edifices.add(Edifice(x, y, w - D, h - D, color=edificesColor))
             rows.append([x + w, y + h])
             centers_street.append([x + w - int(D / 2), y + h - int(D / 2)])
@@ -76,17 +77,21 @@ def generate_fc(init_positions=None, n_fc=None, radius_fc=None, color=(80, 120, 
     :param color: tuple color for femtocells
     :return:
     """
+    if not isinstance(init_positions, np.ndarray):
+        init_positions = np.array(init_positions)
+
     fcs = Group(prefix="F")  # Grupo de femtoceldas
     m, n, _ = init_positions.shape
     space_between_fc = 4
     indx = 0
-    for i in range(m):
-        for j in range(n):
-            if i % space_between_fc == 0 and j % space_between_fc == 0:
-                if indx < n_fc:
-                    position = init_positions[i][j]
-                    fcs.add(Femtocell(*position, radius=radius_fc, color=color, Id="FC" + str(indx + 1), indx=indx))
-                    indx += 1
+    pos_y = [i for i in range(m) if i % 4 == 0]
+    pos_x = [i + 1 for i in range(n) if i % 4 == 0]
+    for i in pos_x:
+        for j in pos_y:
+            if indx < n_fc:
+                position = init_positions[j +1, i]
+                fcs.add(Femtocell(*position, radius=radius_fc, color=color, Id="FC" + str(indx + 1), indx=indx))
+                indx += 1
     return fcs
 
 

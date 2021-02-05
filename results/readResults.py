@@ -1,34 +1,9 @@
 import numpy as np 
 import xlsxwriter
 import matplotlib.pyplot as plt
-from signals import mean_signal
 
 
-def get_signals(data=None, name=None):
-	signals = []
-	if data is not None:
-		for ids in data:
 
-			if name in data[ids]:
-				if name == "Links":
-					links = [len(i) for i in data[ids][name]]
-					signals.append(links)
-				else:
-					signals.append(data[ids][name])
-	return signals
-
-
-def get_signal(data=None, name=None):
-	if (data is not None) and (name is not None):
-		return np.array(mean_signal(get_signals(data=data, name=name)))
-
-
-def calculate_throughput(SNRI):
-	T = []
-	for i in range(len(SNRI)):
-		throughput = np.log2(SNRI[i])
-		T.append(throughput)
-	return T
 
 
 # Create a workbook and add a worksheet.

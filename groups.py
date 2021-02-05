@@ -54,34 +54,6 @@ class Group(object):
             self.elements[Id].clearVariables()
         self.time = []
 
-    def readResults(self):
-        """Lee los resultados del experimento"""
-        for Id in self.elements.keys():
-            self.results[Id] = self.elements[Id].getResults()
-        self.results["time"] = self.time
-        return dict(self.results)
-
-    def printResults(self):
-        """Imprime los resultados en un formato bonito"""
-        for Id in self.results:
-            print("--------------------------------------")
-            print(Id)
-            print("  **Tráfico: ", self.results[Id]["traffic"][:5])
-            print("")
-            print(" **Prx: ", self.results[Id]["Prx"][:5])
-            print("")
-            print(" **time: ", self.results[Id]["time"][:5])
-            print("")
-
-    def getData(self):
-        """Devuelve los resultados obtenidos"""
-        if self.t >= self.T:
-            self.t = 0
-            print("Grabación terminada")
-            return self.readResults()
-        else:
-            return None
-
     def updateTime(self, dt):
         """Actualiza el tiempo de ejecución
         Args:
@@ -128,6 +100,7 @@ class Group(object):
     def setSubscribers(self, n_subscribers=16, fcs=None, subs_per_fc=1):
         """Asignar como subscriptor"""
         cars = self.elements
+        n_cars = len(self.elements)
         if fcs is not None:
             cars_ids = list(cars.keys())
             fcs_ids = list(fcs.keys())
@@ -136,8 +109,9 @@ class Group(object):
             aux = 0
             if n_subscribers <= iters:
                 for i in range(iters):
-                    cars[cars_ids[i]].setSubscription(femtoID=fcs_ids[j], femtoIndx=fcs[fcs_ids[j]].subsCount)
-                    fcs[fcs_ids[j]].addSub()
+                    if i <= n_cars - 1:
+                        cars[cars_ids[i]].setSubscription(femtoID=fcs_ids[j], femtoIndx=fcs[fcs_ids[i]].subsCount)
+                        fcs[fcs_ids[j]].addSub()
                     aux += 1
                     if aux >= subs_per_fc:
                         j += 1
@@ -203,3 +177,13 @@ class Group(object):
                 element.connectWithNeighbors(surface=surface)  # conectar con otros usuarios
             if element.kind == "fc":  # Si es femtocelda
                 element.connectWithUsers(surface=surface)  # conectar con usuarios
+
+    def getData(self):
+        data = {}
+        for element in self.elements.values():
+            data[element.Id] = element.getData()
+        return data
+
+    def enableCoalitions(self):
+        for element in self.elements.values():
+            element.coalition = True

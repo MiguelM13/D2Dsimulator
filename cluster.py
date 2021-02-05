@@ -70,6 +70,9 @@ class Cluster:
     def __init__(self, femtocells=None, users=None, prefix="cluster ", enable=True):
         self.femtocells = femtocells
         self.users = users
+        if enable:
+            self.femtocells.enableCoalitions()
+            self.users.enableCoalitions()
         self.groups = {}
         self.prefix = prefix
 

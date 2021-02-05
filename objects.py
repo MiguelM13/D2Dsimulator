@@ -9,17 +9,27 @@ class Subcarrier(object):
         self.used = False
         self.user1 = None
         self.user2 = None
-        self.bw = 0.015
+        self.bw = 0.015  # MHz
 
     def isUsed(self):
+        """¿Está en uso esta portadora?"""
         return self.used
 
     def setLink(self, user1=None, user2=None):
+        """Guardar Link"""
         if (user1 is not None) and (user2 is not None):
             self.user1 = user1
             self.user2 = user2
+            self.used = True
 
-    def getUsersLink(self):
+    def removeLink(self):
+        """Elimina el enlace"""
+        self.user1 = None
+        self.user2 = None
+        self.used = False
+
+    def getUsersLinked(self):
+        """Devolver usuarios enlazados"""
         return self.user1, self.user2
 
 
@@ -27,13 +37,40 @@ class Subcarries(object):
     def __init__(self, n_subcarriers=256, prefix="subcarrier "):
         self.n_subcarriers = n_subcarriers
         self.subcarriers = {prefix+str(i+1): Subcarrier(Id=prefix+str(i+1)) for i in range(n_subcarriers)}
+        self.names = list(self.subcarriers.keys())
+        self.indx = 0
+
+    def __len__(self):
+        return len(self.subcarriers)
 
     def getUsedCarriers(self):
+        """Devuelve las subportadoras en uso"""
         usedSubcarriers = []
         for subcarrier in self.subcarriers.values():
             if subcarrier.isUsed():
                 usedSubcarriers.append(subcarrier)
         return usedSubcarriers
+
+    def getSubcarrierOf(self, user1, user2):
+        if (user1 is not None) and (user2 is not None):
+            for subcarrier in self.subcarriers.values():
+                linked_user1, linked_user2 = subcarrier.getUsersLinked()
+                if linked_user1 == user1 and linked_user2 == user2:
+                    return subcarrier.Id
+        return None
+
+    def setLink(self, user1=None, user2=None):
+        """Establece enlace entre dos usuarios"""
+        for subcarrier in self.subcarriers.values():
+            if not subcarrier.isUsed():
+                subcarrier.setLink(user1, user2)
+                break
+
+    def removeLink(self, user1=None, user2=None):
+        if (user1 is not None) and (user2 is not None):
+            subcarrierID = self.getSubcarrierOf(user1, user2)
+            if subcarrierID is not None:
+                self.subcarriers[subcarrierID].removeLink()
 
 
 class Edifice(object):
@@ -102,4 +139,4 @@ class Register(object):
         return list(self.dic.keys())
 
     def isIn(self, user):
-        return user.Id in list(self.dic.keys())
+        return user.Id in self.dic

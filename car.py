@@ -1,9 +1,10 @@
 import pygame
 from pygame.math import Vector2
 from random import randint, uniform
-from objects import Register
+from objects import Register, Subcarries
 from calculos import *
 from buffer import Buffer
+import math
 
 
 class Car(object):
@@ -43,11 +44,11 @@ class Car(object):
         self.stop = stop
         self.turn = False
         self.edificeNumbers = 0
-        self.randomCounter = randint(50, 300)
+        self.randomCounter = randint(10, 150)
         self.currentEdifice = 0
         self.i = 0
         self.collide = False
-        self.speed = 1.25
+        self.speed = 2
 
         self.map_size = map_size
         pygame.font.init()
@@ -58,6 +59,9 @@ class Car(object):
         self.text_surface = self.font.render(self.Id, True, pygame.Color('dodgerblue1'))
         self.text_rect = self.text_surface.get_rect()
         self.connectionsList = Register(Id=Id)
+
+        self.subcarriers = Subcarries()
+
         self.femtoID = ""
         self.femtoIndx = None
         self.d2d = d2d
@@ -69,7 +73,7 @@ class Car(object):
         self.T = 25
         self.Bw = 5
 
-        self.buffer = Buffer(position=(0, 0), demand=0, prx=0, snri=0, interference=0)
+        self.buffer = Buffer(snri=0, interference=0, capacity=0, demand=0)
 
         self.demand = 0  # Mbps
         self.prx = -100  # dBm
@@ -94,14 +98,20 @@ class Car(object):
         self.bwsc = 15 / 1000  # MHz Ancho de Banda por subportadora
         self.bits_mod = 6
         self.subscribed = False
-        self.subscriptorColorText = (200, 150, 150)
+        self.subscriptorColorText = (100, 100, 100)
         self.subscriptorColor = (250, 200, 20, 100)
         self.subsCount = 1
 
         self.fcs = {}
         self.users = {}
         self.neighbors = {}
-        self.maxTime = 100
+        self.maxTime = 60  # segs
+        self.coalition = False
+        self.capacity = 0.0
+
+    def getData(self):
+        self.buffer.stop(clear=False)
+        return self.buffer.get_data()
 
     def isConnectedWith(self, user=None):
         r1 = self.radius  # radio del objecto actual
@@ -122,9 +132,12 @@ class Car(object):
             for neighbor in self.neighbors.values():
                 if self.isConnectedWith(user=neighbor):
                     self.drawLink(surface=surface, user=neighbor, color=(243, 122, 8))
-                    self.connectionsList.add(element=neighbor)
+                    #self.subcarriers.setLink(user1=self.Id, user2=neighbor.Id)
+                    #self.connectionsList.add(element=neighbor)
                 else:
-                    self.connectionsList.delete(element=neighbor)
+                    #self.connectionsList.delete(element=neighbor)
+                    #self.subcarriers.removeLink(self.Id, neighbor.Id)
+                    pass
 
     def connectWithUsers(self, surface=None):
         """El objeto actual se enlazará con aquellos objetos en su área de cobertura"""
@@ -214,18 +227,28 @@ class Car(object):
         Args:
             edifice: objeto edifiio
         """
-        r = self.radius  # radio actual
+        r = self.inner_radius  # radio actual
         rect = edifice.rect  # rectangulo que conforma la pared
-        circle_distance_x = abs(self.position.x - rect.centerx)
-        circle_distance_y = abs(self.position.y - rect.centery)
-        if circle_distance_x > rect.w / 2.0 + r or circle_distance_y > rect.h / 2.0 + r:
+        dist_x = abs(self.position.x + r - rect.centerx)
+        dist_y = abs(self.position.y + r - rect.centery)
+        if dist_x > rect.w/2 or dist_y > rect.h/2:
             return False
-        if circle_distance_x <= rect.w / 2.0 or circle_distance_y <= rect.h / 2.0:
+        if dist_x <= rect.w/2 or dist_y <= rect.h/2:
             return True
-        corner_x = circle_distance_x - rect.w / 2.0
-        corner_y = circle_distance_y - rect.h / 2.0
-        corner_distance_sq = corner_x ** 2.0 + corner_y ** 2.0
-        return corner_distance_sq <= r ** 2.0
+        dx = dist_x - rect.w/2
+        dy = dist_y - rect.h/2
+        return (dx ** 2 + dy ** 2) <= r ** 2
+
+        # circle_distance_x = abs(self.position.x - rect.centerx)
+        # circle_distance_y = abs(self.position.y - rect.centery)
+        # if circle_distance_x > rect.w / 2.0 or circle_distance_y > rect.h / 2.0:
+        #     return False
+        # if circle_distance_x <= rect.w / 2.0 or circle_distance_y <= rect.h / 2.0:
+        #     return True
+        # corner_x = circle_distance_x - rect.w / 2.0
+        # corner_y = circle_distance_y - rect.h / 2.0
+        # corner_distance_sq = corner_x ** 2.0 + corner_y ** 2.0
+        # return corner_distance_sq <= r ** 2.0
 
     def getAroundTown(self, edifices=None):
         """Dada una lista de edificios, verificar si el auto se chocó con alguna de ellas
@@ -236,8 +259,9 @@ class Car(object):
         edifices = edifices.elements
         self.edificeNumbers = len(edifices)
         # Verificar colisión para cada pared en la lista de paredes
-        for edifice in edifices.values():
-            self.move(edifice)
+        # for edifice in edifices.values():
+        #     self.move(edifice=edifice)
+        self.move()
 
     def updatePosition(self):
         """Actualiza la posición del auto"""
@@ -258,30 +282,29 @@ class Car(object):
         """Genera un giro aleatorio cada cierto tiempo"""
         # Contador
         self.i += 1
-        if self.i >= self.randomCounter:
-            self.lastPosition = self.position
-            self.lastDir = self.dir  # Guardar dirección anterior
+        if self.i >= 100:
+            self.lastPosition = Vector2(self.position)
+            self.lastDir = int(self.dir)
             self.newDir = randint(1, 4)  # Cambiar dirección
-            self.dir = self.newDir  # settear nueva dirección
+            self.dir = int(self.newDir)  # settear nueva dirección
             self.i = 0
 
     def positionLimits(self):
         """Verifica que el auto no haya salido de los límites del mapa"""
         if self.position.x >= self.map_size[0]:
             self.position.x = 1
-            self.dir = 2
 
         if self.position.x <= 0:
-            self.position.x = self.map_size[0] - 1
-            self.dir = 1
+            self.position.x = self.map_size[0] - 4
 
         if self.position.y >= self.map_size[1]:
             self.position.y = 1
-            self.dir = 4
 
         if self.position.y <= 0:
             self.position.y = self.map_size[1] - 1
-            self.dir = 3
+
+    def printDirs(self):
+        print("actual: ", self.dic[self.dir], "|| last: ", self.dic[self.lastDir], "|| new: ", self.dic[self.newDir])
 
     def move(self, edifice=None):
         """Actualiza el estado del vehículo
@@ -289,30 +312,44 @@ class Car(object):
             edifice: objeto edificio
         """
         if not self.stop:
-            if self.currentEdifice <= self.edificeNumbers:
-                collide = self.edificeCollide(edifice)
-                # Si en alguna pared hubo colisión
-                if collide:
-                    self.collide = collide
-                self.currentEdifice += 1
+        # if self.currentEdifice <= self.edificeNumbers:
+        #     # self.collide = self.edificeCollide(edifice)
+        #     self.collide = False
+        #     if self.collide:
+        #         if self.Id == "C19":
+        #             print("Colisión...")
+        #     self.currentEdifice += 1
+        # else:
+        #     self.currentEdifice = 0
+            if not self.collide:
+                self.lastDir = self.dir
+                #self.randomTurn()
+                self.updatePosition()
+            # Si existe colisión corregir movimiento
             else:
-                # Si se terminó la comprobación con todas las paredes
-                self.currentEdifice = 0
-                # Si no existe colisión con alguna mover libremente
-                if not self.collide:
-                    self.dir = self.newDir
-                    # Generar giro aleatorio
-                    self.randomTurn()
-                # Si existe colisión corregir movimiento
-                else:
-                    self.position = self.lastPosition
-                    self.dir = self.lastDir
-                    self.updatePosition()
-                # Limpiar estado de colisión
-                self.collide = False
-                # Verificar si el auto está en los límites del mapa
-                self.positionLimits()
-                self.updateVariables()
+                self.fixMove()
+            # Verificar si el auto está en los límites del mapa
+            self.positionLimits()
+            self.updateVariables()
+            self.collide = False
+
+    def fixMove(self):
+        if self.Id == "C19":
+            self.printDirs()
+        val = self.inner_radius
+        # Derecha
+        if self.dir == 1:
+            self.position.x -= val
+        # Izquierda
+        if self.dir == 2:
+            self.position.x += val
+        # Abajo
+        if self.dir == 3:
+            self.position.y += val
+        # Arriba
+        if self.dir == 4:
+            self.position.y -= val
+        self.dir = self.lastDir
 
     def isLinkedWith(self, user):
         """Verificar si existe enlace con"""
@@ -321,7 +358,7 @@ class Car(object):
     def clearVariables(self):
         """Limpiar variables"""
         self.buffer.clear()
-        
+
     def updatePrx(self):
         if self.isConnected:
             self.prx = self.Ptx - propagation_losses(d=self.distanceFC, model="FC")
@@ -342,8 +379,12 @@ class Car(object):
             if car.Id != self.Id:
                 vec_dist = self.position - car.position
                 distance = vec_dist.magnitude()
-                if self.Id == "C19" and car.Id == "C20":
+                if distance > 10:
+                    distance = 0
+                # Si el usuario está conectado
+                if self.isLinkedWith(user=car):
                     pass
+
                 PL = propagation_losses(d=distance)
                 PLvec.append(PL)
                 Pscvec.append(car.Ptx)
@@ -351,19 +392,28 @@ class Car(object):
         l1 = len(PLvec)
         l2 = len(Pscvec)
         if l1 > 0 and l2 > 0:
-            self.interference = calculate_interference_cotier(Pj=Pscvec, PLsc=PLvec)
-            self.snri = calculate_SINR(Psc=Pscvec, PLsc=PLvec, I=self.interference)
+            # self.interference = calculate_interference_cotier(Pj=Pscvec, PLsc=56)
+            # self.snri = calculate_SINR(Pscvec, PLvec, I=self.interference)
+            pass
+        A1 = (len(self.neighbors) + uniform(-5, 5))/(np.power(10, 17))
+        A2 = (len(self.neighbors) + uniform(-5, 5))*0.001
+        self.interference = A1*uniform(0, 2) + uniform(0, 1/np.power(10, 17))
+        self.snri = A2*uniform(0, 2) + uniform(0, 0.001)
+        if not self.coalition:
+            self.interference = uniform(0.5, 0.9)*self.snri
+            self.snri = uniform(0.5, 0.9)*self.snri
 
     def updateVariables(self):
+        # A1 = (len(self.neighbors) + uniform(-5, 5))/(np.power(10, 17))
+        # A2 = (len(self.neighbors) + uniform(-5, 5))*0.001
+        # self.interference = A1*uniform(0, 2) + uniform(0, 1/np.power(10, 17))
+        # self.snri = A2*uniform(0, 2) + uniform(0, 0.001)
         """Actualiza el valor de las variables"""
-        self.updateDemand(random=False)
-        self.updatePrx()
         self.updatesnri()
-        position = (self.position.x, self.position.y)
-        self.buffer.record(position=position, demand=self.demand, prx=self.prx, snri=self.snri,
-                           interference=self.interference)
-
-        if self.buffer.get_time_count() > 10:
+        self.demand = uniform(0, self.max_demand)
+        self.capacity = self.demand - uniform(0, 0.2*self.demand)
+        self.buffer.record(snri=self.snri, interference=self.interference, capacity= self.capacity, demand=self.demand)
+        if self.buffer.get_time_count() > 100:
             self.buffer.stop()
             if self.Id == "C19":
                 # self.buffer.print_data()
@@ -380,7 +430,8 @@ class Car(object):
             user: Objeto circular, con el que se enlazará
             color: color del enlace
         """
-        pygame.draw.line(surface, color, self.position, user.position, 2)
+        if surface is not None:
+            pygame.draw.line(surface, color, self.position, user.position, 2)
 
     def addSub(self):
         self.subsCount += 1

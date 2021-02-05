@@ -23,7 +23,6 @@ class Buffer:
         self.kwargs = kwargs
         self.siglen = siglen
         self.signals = {ID: deque(maxlen=self.siglen) for ID in kwargs.keys()}
-        self.time = deque(maxlen=self.siglen)
         self.recording = False
         self.initialTime = 0
         self.currentTime = 0
@@ -38,7 +37,7 @@ class Buffer:
             self.recording = True
             self.initialTime = time.time()
         self.currentTime = time.time()
-        self.time.append(self.currentTime)
+        # self.time.append(self.currentTime)
 
     def get_time_count(self):
         """It returns """
@@ -132,7 +131,7 @@ class Buffer:
         self.initialTime = 0
         self.recording = False
         self.data_to_array()
-        self.fix_time_scale()
+        #self.fix_time_scale()
         self.signals["size"] = self.get_size()
 
         if save:

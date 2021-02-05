@@ -20,7 +20,8 @@ class Femtocell(Car):
             self.font = pygame.font.Font(None, 30)
         except Exception as e:
             print(e)
-        self.text_surface = self.font.render(self.Id, True, pygame.Color('dodgerblue1'))
+        self.textColor = (20, 210, 105)
+        self.text_surface = self.font.render(self.Id, True, self.textColor)
         self.text_rect = self.text_surface.get_rect()
         self.kind = "fc"
 

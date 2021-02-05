@@ -27,7 +27,7 @@ class Simulator:
         self.fcs.setNeighbors()
         self.cars.setFemtocells(fcs)
         self.cars.setNeighbors()
-        self.cars.setSubscribers(n_subscribers=16, fcs=fcs)
+        self.cars.setSubscribers(n_subscribers=len(fcs), fcs=fcs)
         self.cluster = Cluster(femtocells=self.fcs, users=self.cars, enable=clusters)
 
         pygame.display.update()
