@@ -400,8 +400,8 @@ class Car(object):
         self.interference = A1*uniform(0, 2) + uniform(0, 1/np.power(10, 17))
         self.snri = A2*uniform(0, 2) + uniform(0, 0.001)
         if not self.coalition:
-            self.interference = uniform(0.5, 0.9)*self.snri
-            self.snri = uniform(0.5, 0.9)*self.snri
+            self.interference = uniform(1.1, 1.5)*self.interference
+            self.snri = uniform(1.1, 1.5)*self.snri
 
     def updateVariables(self):
         # A1 = (len(self.neighbors) + uniform(-5, 5))/(np.power(10, 17))

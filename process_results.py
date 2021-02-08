@@ -59,13 +59,17 @@ plot2(t=cars_number, x1=snris_m, x2=snris_m2, xlabel="número de usuarios", titl
 plot2(t=cars_number, x1=ths_m, x2=ths_m2, xlabel="número de usuarios", title="Rendimiento Promedio",name1="Sistema D2D",
       name2="sistema D2D con clusters", ylabel="Mbps")
 
+plot2(t=cars_number, x1=intfs_m, x2=intfs_m2, xlabel="número de usuarios", title="Interferencia Promedio",name1="Sistema D2D",
+      name2="sistema D2D con clusters", ylabel="Mbps")
 
+plot2(t=cars_number, x1=s_m, x2=s_m2, xlabel="número de usuarios", title="Satisfacción Promedio",name1="Sistema D2D",
+      name2="sistema D2D con clusters", ylabel="%")
 
 
 plot_signals(t=t, signals=snris, prefix="n_cars: ", vec=cars_number, xlabel="Tiempo (seg)", title="SNRI D2D sin clusters")
 plot_signals(t=t, signals=snris2, prefix="n_cars: ", vec=cars_number, xlabel="Tiempo (seg)", title="SNRI D2D con clusters")
 
-plot_signals(t=t, signals=intfs2, prefix="n_cars: ", vec=cars_number, xlabel="Tiempo (seg)", title="Interferencia D2D sin clusters")
+plot_signals(t=t, signals=intfs, prefix="n_cars: ", vec=cars_number, xlabel="Tiempo (seg)", title="Interferencia D2D sin clusters")
 plot_signals(t=t, signals=intfs2, prefix="n_cars: ", vec=cars_number, xlabel="Tiempo (seg)", title="Interferencia D2D con clusters")
 
 
