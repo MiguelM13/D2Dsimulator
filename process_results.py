@@ -24,15 +24,15 @@ def read_data(name="", cars_number=None):
         data = np.load(full_name, allow_pickle=True)[()]
         data_cars = data["cars"]
         data_fcs = data["fcs"]
-        snri = get_signal(data_cars, "snri", alf=0.5, N=3)
+        snri = get_signal(data_cars, "snri", alf=0.8, N=3)
         intf = get_signal(data_cars, "interference", alf=0.8, N=3)
         di = get_signal(data_cars, "demand")
         yi = get_signal(data_cars, "capacity")
         s = calcule_satisfaction(yi, di)
         th = calculate_throughput(snri)
-        snris_m.append(np.mean(snri) + uniform(0, 0.2*max(snri)))
+        snris_m.append(np.mean(snri))
         intfs_m.append(np.mean(intf))
-        ths_m.append(th + uniform(0, 0.2*th))
+        ths_m.append(th)
         yi_m.append(np.mean(yi))
         di_m.append(np.mean(di))
         s_m.append(s)
@@ -53,16 +53,16 @@ snris2, intfs2, snris_m2, intfs_m2, ths_m2, yi_m2, di_m2, s_m2 = read_data(name=
 
 t = np.linspace(0, 20, len(snris[0]))
 
-plot2(t=cars_number, x1=snris_m, x2=snris_m2, xlabel="número de usuarios", title="SNRI Promedio", name1="Sistema D2D",
+plot2(t=cars_number, x1=snris_m, x2=snris_m2, xlabel="número de usuarios", title="SNRI Promedio", name1="Sistema D2D sin clusters",
       name2="sistema D2D con clusters")
 
-plot2(t=cars_number, x1=ths_m, x2=ths_m2, xlabel="número de usuarios", title="Rendimiento Promedio",name1="Sistema D2D",
+plot2(t=cars_number, x1=ths_m, x2=ths_m2, xlabel="número de usuarios", title="Rendimiento Promedio",name1="Sistema D2D sin clusters",
       name2="sistema D2D con clusters", ylabel="Mbps")
 
-plot2(t=cars_number, x1=intfs_m, x2=intfs_m2, xlabel="número de usuarios", title="Interferencia Promedio",name1="Sistema D2D",
+plot2(t=cars_number, x1=intfs_m, x2=intfs_m2, xlabel="número de usuarios", title="Interferencia Promedio",name1="Sistema D2D sin clusters",
       name2="sistema D2D con clusters", ylabel="Mbps")
 
-plot2(t=cars_number, x1=s_m, x2=s_m2, xlabel="número de usuarios", title="Satisfacción Promedio",name1="Sistema D2D",
+plot2(t=cars_number, x1=s_m, x2=s_m2, xlabel="número de usuarios", title="Satisfacción Promedio",name1="Sistema D2D sin clusters",
       name2="sistema D2D con clusters", ylabel="%")
 
 

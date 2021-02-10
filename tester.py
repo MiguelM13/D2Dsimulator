@@ -38,7 +38,7 @@ def get_experiment_name(d2d=False, cluster=False):
 # ------------ Parámetros de simulación ----------------
 n_experiments = 10  # número de experimentos
 n_clusters = 5  # número de clusters
-enable = True  # clusters bandera
+enable = False  # clusters bandera
 d2d = True  # D2D bandera
 cars_number = [10 * (i + 1) for i in range(n_experiments)]  # número de autos
 fcs_number = [5 * (i + 1) for i in range(n_experiments)]  # número de femtoceldas

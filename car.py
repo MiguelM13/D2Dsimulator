@@ -401,6 +401,7 @@ class Car(object):
         self.snri = A2*uniform(0, 2) + uniform(0, 0.001)
         if not self.coalition:
             self.interference = uniform(1.1, 1.5)*self.interference
+        else:
             self.snri = uniform(1.1, 1.5)*self.snri
 
     def updateVariables(self):

@@ -17,7 +17,7 @@ class Coalition:
         except Exception as e:
             print(e)
         self.text_surface = self.font.render(self.Id, True, (50, 50, 50, 50))
-        self.color = [20, 90, 120, 95]
+        self.color = [20, 90, 120, 50]
         self.inner_color = [20, 90, 120, 50]
         self.radius = 100
         self.inner_radius = 5
@@ -61,13 +61,26 @@ class Coalition:
             return False
 
     def draw(self, surface):
-        pygame.draw.circle(surface, self.inner_color, self.centroid, self.inner_radius, 0)
-        pygame.draw.circle(surface, self.color, self.centroid, self.radius, 0)
+        # pygame.draw.circle(surface, self.inner_color, self.centroid, self.inner_radius, 0)
+        # pygame.draw.circle(surface, self.color, self.centroid, self.radius, 0)
+        # surface.blit(self.text_surface, self.centroid)
+        #E 
+        rect = pygame.Rect(self.centroid, (0, 0)).inflate((self.radius*2, self.radius*2))
+        surf = pygame.Surface(rect.size, pygame.SRCALPHA)
+        pygame.draw.circle(surf, self.color, (self.radius, self.radius), self.radius)
+        surface.blit(surf, rect)
+
+        # Inner radius
+        rect = pygame.Rect(self.centroid, (0, 0)).inflate((self.inner_radius*2, self.inner_radius*2))
+        surf = pygame.Surface(rect.size, pygame.SRCALPHA)
+        pygame.draw.circle(surf, self.inner_color, (self.inner_radius, self.inner_radius), self.inner_radius)
+        surface.blit(surf, rect)
+
+        # Text
         surface.blit(self.text_surface, self.centroid)
 
-
 class Cluster:
-    def __init__(self, femtocells=None, users=None, prefix="cluster ", enable=True):
+    def __init__(self, femtocells=None, users=None, prefix="cluster ", enable=True, max_iters=30):
         self.femtocells = femtocells
         self.users = users
         if enable:
@@ -80,13 +93,14 @@ class Cluster:
         self.centroids = None
         self.indx = 0
         self.enable = enable
+        self.max_iters = max_iters
 
     def isEnabled(self):
         return self.enable
 
     def isProcessing(self):
         self.indx += 1
-        if self.indx <= 30:
+        if self.indx <= self.max_iters:
             return False
         else:
             self.indx = 0
@@ -95,17 +109,18 @@ class Cluster:
     def group(self, n_clusters=5):
         if self.femtocells is not None and self.users is not None:
             if self.isEnabled():
-                users_positions = self.users.getSubsPositionsList()
-                kmeans = KMeans(n_clusters=n_clusters).fit(users_positions)
-                self.centroids = kmeans.cluster_centers_.T
-                for i in range(n_clusters):
-                    x = self.centroids[0][i]
-                    y = self.centroids[1][i]
-                    centroid = (x, y)
-                    ids = "Cluster " + str(i+1)
-                    self.groups[ids] = Coalition(Id=ids, centroid=centroid)
-                    self.groups[ids].addUsers(users=self.users)
-                self.printGroups()
+                    if self.isProcessing():
+                        users_positions = self.users.getSubsPositionsList()
+                        kmeans = KMeans(n_clusters=n_clusters).fit(users_positions)
+                        self.centroids = kmeans.cluster_centers_.T
+                        for i in range(n_clusters):
+                            x = self.centroids[0][i]
+                            y = self.centroids[1][i]
+                            centroid = (x, y)
+                            ids = "Cluster " + str(i+1)
+                            self.groups[ids] = Coalition(Id=ids, centroid=centroid)
+                            self.groups[ids].addUsers(users=self.users)
+                    #self.printGroups()
 
     def draw(self, surface):
         if self.centroids is not None and self.isEnabled():
